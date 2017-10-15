@@ -25,8 +25,10 @@ import (
 )
 
 var (
-	cfgFile, command string
-	machines         []string
+	cfgFile  string
+	command  string
+	user     string
+	machines []string
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -36,7 +38,7 @@ var RootCmd = &cobra.Command{
 	Long:  `Sshrunner runs ssh commands across multiple servers`,
 	// Bare app run
 	Run: func(cmd *cobra.Command, args []string) {
-		exec.Run(machines, command)
+		exec.Run(machines, command, user)
 	},
 }
 
@@ -50,18 +52,17 @@ func Execute() {
 }
 
 func init() {
+	curUser := os.Getenv("LOGNAME")
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
+	// Persistent flags
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.sshrunner.yaml)")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
+	// Local flags
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	RootCmd.Flags().StringArrayVarP(&machines, "machines", "m", []string{}, "Hosts to run command on")
-	RootCmd.Flags().StringVarP(&command, "command", "c", "", "Commond to run")
+	RootCmd.Flags().StringVarP(&command, "command", "c", "", "Command to run")
+	RootCmd.Flags().StringVarP(&user, "user", "u", curUser, "User to run the command as")
 }
 
 // initConfig reads in config file and ENV variables if set.

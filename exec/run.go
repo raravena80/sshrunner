@@ -74,14 +74,13 @@ func executeCmd(cmd, hostname string, config *ssh.ClientConfig) string {
 }
 
 // Run the ssh command
-func Run(machines []string, cmd string) {
+func Run(machines []string, cmd string, user string) {
 	// in 5 seconds the message will come to timeout channel
 	timeout := time.After(5 * time.Second)
 	results := make(chan string, 10)
 
 	config := &ssh.ClientConfig{
-		//User: os.Getenv("LOGNAME"),
-		User:            "root",
+		User:            user,
 		Auth:            []ssh.AuthMethod{makeKeyring()},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
