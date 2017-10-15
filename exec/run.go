@@ -41,7 +41,10 @@ func makeSigner(keyname string) (signer ssh.Signer, err error) {
 
 func makeKeyring() ssh.AuthMethod {
 	signers := []ssh.Signer{}
-	keys := []string{os.Getenv("HOME") + "/.ssh/id_rsa", os.Getenv("HOME") + "/.ssh/id_dsa"}
+	keys := []string{
+		os.Getenv("HOME") + "/.ssh/id_rsa",
+		os.Getenv("HOME") + "/.ssh/id_dsa"}
+
 	for _, keyname := range keys {
 		signer, err := makeSigner(keyname)
 		if err == nil {
@@ -52,7 +55,14 @@ func makeKeyring() ssh.AuthMethod {
 }
 
 func executeCmd(cmd, hostname string, config *ssh.ClientConfig) string {
-	conn, _ := ssh.Dial("tcp", hostname+":22", config)
+	fmt.Println(hostname)
+	conn, err := ssh.Dial("tcp", hostname+":22", config)
+
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+
 	session, _ := conn.NewSession()
 	defer session.Close()
 
@@ -71,8 +81,9 @@ func Run(machines []string, cmd string) {
 
 	config := &ssh.ClientConfig{
 		//User: os.Getenv("LOGNAME"),
-		User: "ubuntu",
-		Auth: []ssh.AuthMethod{makeKeyring()},
+		User:            "root",
+		Auth:            []ssh.AuthMethod{makeKeyring()},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
 	for _, m := range machines {
