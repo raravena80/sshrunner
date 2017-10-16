@@ -39,7 +39,10 @@ var RootCmd = &cobra.Command{
 	Long:  `Sshrunner runs ssh commands across multiple servers`,
 	// Bare app run
 	Run: func(cmd *cobra.Command, args []string) {
-		exec.Run(machines, command, user, key)
+		exec.Run(viper.Get("sshrunner.machines"),
+			viper.Get("sshrunner.command"),
+			viper.Get("sshrunner.user"),
+			viper.Get("sshrunner.key"))
 	},
 }
 
@@ -53,9 +56,10 @@ func Execute() {
 }
 
 func init() {
+	cobra.OnInitialize(initConfig)
+
 	curUser := os.Getenv("LOGNAME")
 	sshKey := os.Getenv("HOME") + "/.ssh/id_rsa"
-	cobra.OnInitialize(initConfig)
 
 	// Persistent flags
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.sshrunner.yaml)")
@@ -63,9 +67,13 @@ func init() {
 	// Local flags
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	RootCmd.Flags().StringArrayVarP(&machines, "machines", "m", []string{}, "Hosts to run command on")
+	viper.BindPFlag("sshrunner.machines", RootCmd.Flags().Lookup("machines"))
 	RootCmd.Flags().StringVarP(&command, "command", "c", "", "Command to run")
+	viper.BindPFlag("sshrunner.command", RootCmd.Flags().Lookup("command"))
 	RootCmd.Flags().StringVarP(&user, "user", "u", curUser, "User to run the command as")
+	viper.BindPFlag("sshrunner.user", RootCmd.Flags().Lookup("user"))
 	RootCmd.Flags().StringVarP(&key, "key", "k", sshKey, "Ssh key to use, full path")
+	viper.BindPFlag("sshrunner.key", RootCmd.Flags().Lookup("key"))
 }
 
 // initConfig reads in config file and ENV variables if set.
