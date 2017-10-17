@@ -4,6 +4,8 @@ jobs:
     working_directory: /go/src/github.com/raravena80/sshrunner
     docker:
       - image: circleci/golang:1.8
+    environment:
+      TEST_RESULTS: /tmp/test-results
     steps:
       - checkout
       - run:
