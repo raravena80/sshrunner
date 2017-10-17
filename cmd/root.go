@@ -66,7 +66,6 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.sshrunner.yaml)")
 
 	// Local flags
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	RootCmd.Flags().StringArrayVarP(&machines, "machines", "m", []string{}, "Hosts to run command on")
 	viper.BindPFlag("sshrunner.machines", RootCmd.Flags().Lookup("machines"))
 	RootCmd.Flags().StringVarP(&command, "command", "c", "", "Command to run")

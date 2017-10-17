@@ -14,7 +14,6 @@ Flags:
   -h, --help                   help for sshrunner
   -k, --key string             Ssh key to use, full path (default "$HOME/.ssh/id_rsa")
   -m, --machines stringArray   Hosts to run command on
-  -t, --toggle                 Help message for toggle
   -a, --useagent               Use agent for authentication
   -u, --user string            User to run the command as (default "username")
 ```
