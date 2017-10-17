@@ -1,4 +1,4 @@
-# sshrunner
+# sshrunner [![CircleCI Build Status](https://circleci.com/gh/raravena80/sshrunner.svg?style=shield)](https://circleci.com/gh/raravena80/sshrunner) [![MIT Licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/circleci/cci-demo-react/master/LICENSE)
 Run commands across servers using ssh
 
 ## Usage
