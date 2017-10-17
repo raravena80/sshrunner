@@ -42,7 +42,8 @@ var RootCmd = &cobra.Command{
 		exec.Run(viper.GetStringSlice("sshrunner.machines"),
 			viper.GetString("sshrunner.command"),
 			viper.GetString("sshrunner.user"),
-			viper.GetString("sshrunner.key"))
+			viper.GetString("sshrunner.key"),
+			viper.GetBool("sshrunner.useagent"))
 	},
 }
 
@@ -72,8 +73,10 @@ func init() {
 	viper.BindPFlag("sshrunner.command", RootCmd.Flags().Lookup("command"))
 	RootCmd.Flags().StringVarP(&user, "user", "u", curUser, "User to run the command as")
 	viper.BindPFlag("sshrunner.user", RootCmd.Flags().Lookup("user"))
-	RootCmd.Flags().StringVarP(&key, "key", "k", sshKey, "Ssh key to use, full path")
+	RootCmd.Flags().StringVarP(&key, "key", "k", sshKey, "Ssh key to use for authentication, full path")
 	viper.BindPFlag("sshrunner.key", RootCmd.Flags().Lookup("key"))
+	RootCmd.Flags().BoolP("useagent", "a", false, "Use agent for authentication")
+	viper.BindPFlag("sshrunner.useagent", RootCmd.Flags().Lookup("useagent"))
 }
 
 // initConfig reads in config file and ENV variables if set.

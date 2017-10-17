@@ -18,7 +18,9 @@ import (
 	"bytes"
 	"fmt"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 	"io/ioutil"
+	"net"
 	"os"
 	"time"
 )
@@ -39,8 +41,18 @@ func makeSigner(keyname string) (signer ssh.Signer, err error) {
 	return
 }
 
-func makeKeyring(key string) ssh.AuthMethod {
+func makeKeyring(key string, useAgent bool) ssh.AuthMethod {
 	signers := []ssh.Signer{}
+
+	if useAgent == true {
+		aConn, _ := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK"))
+		sshAgent := agent.NewClient(aConn)
+		aSigners, _ := sshAgent.Signers()
+		for _, signer := range aSigners {
+			signers = append(signers, signer)
+		}
+	}
+
 	keys := []string{
 		key,
 		os.Getenv("HOME") + "/.ssh/id_dsa"}
@@ -69,18 +81,18 @@ func executeCmd(cmd, hostname string, config *ssh.ClientConfig) string {
 	session.Stdout = &stdoutBuf
 	session.Run(cmd)
 
-	return hostname + ": " + stdoutBuf.String()
+	return hostname + ":\n" + stdoutBuf.String()
 }
 
 // Run the ssh command
-func Run(machines []string, cmd string, user string, key string) {
+func Run(machines []string, cmd string, user string, key string, useAgent bool) {
 	// in 5 seconds the message will come to timeout channel
 	timeout := time.After(5 * time.Second)
 	results := make(chan string, 10)
 
 	config := &ssh.ClientConfig{
 		User:            user,
-		Auth:            []ssh.AuthMethod{makeKeyring(key)},
+		Auth:            []ssh.AuthMethod{makeKeyring(key, useAgent)},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
