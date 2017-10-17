@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/raravena80/sshrunner
+    docker:
+      - image: circleci/golang:1.8
+    steps:
+      - checkout
+      - run:
+          name: Test Results Dir
+          command: mkdir -p $TEST_RESULTS
+      - run:
+          name: Get Junit reporting tool
+          command: go get github.com/jstemmer/go-junit-report
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build
