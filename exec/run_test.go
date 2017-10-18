@@ -19,6 +19,7 @@ import (
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/testdata"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -69,11 +70,10 @@ func TestMakeSigner(t *testing.T) {
 			// Write content of the key to the keyname file
 			ioutil.WriteFile(tt.key.keyname, tt.key.content, 0644)
 			returned, _ := makeSigner(tt.key.keyname)
-			fmt.Println(reflect.TypeOf(&returned))
-			fmt.Println(reflect.TypeOf(tt.expected))
 			if !reflect.DeepEqual(returned, tt.expected) {
 				t.Errorf("Value received: %v expected %v", returned, tt.expected)
 			}
+			os.Remove(tt.key.keyname)
 		})
 	}
 }
