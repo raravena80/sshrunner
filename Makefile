@@ -1,7 +1,20 @@
+GOFILES = $(shell find . -name '*.go' -not -path './vendor/*')
+GOPACKAGES = $(shell go list ./...  | grep -v /vendor/)
 
-PACKAGE  = sshrunner
-BASE     = $(GOPATH)/src/github.com/raravena80/$(PACKAGE)
+default: build
 
-.PHONY: all
-all: | $(BASE)
-	cd $(BASE) && $(GO) build -o $(GOPATH)/bin/$(PACKAGE) main.go
+workdir:
+	mkdir -p workdir
+
+build: workdir/contacts
+
+build-native: $(GOFILES)
+	go build -o workdir/native-contacts .
+
+workdir/contacts: $(GOFILES)
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o workdir/contacts .
+
+test: test-all
+
+test-all:
+	@go test -v $(GOPACKAGES)
