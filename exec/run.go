@@ -25,10 +25,6 @@ import (
 	"time"
 )
 
-type SignerContainer struct {
-	signers []ssh.Signer
-}
-
 func makeSigner(keyname string) (signer ssh.Signer, err error) {
 	fp, err := os.Open(keyname)
 	if err != nil {
