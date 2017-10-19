@@ -121,9 +121,6 @@ func TestMakeKeyring(t *testing.T) {
 			// Write content of the key to the keyname file
 			ioutil.WriteFile(tt.key.keyname, tt.key.content, 0644)
 			returned := makeKeyring(tt.key.keyname, tt.useagent)
-			if diff := pretty.Compare(tt.expected, returned); diff != "" {
-				t.Errorf("%s: post-AddCrew diff: (-got +want)\n%s", tt.name, diff)
-			}
 			// DeepEqual always returns false for functions unless nil
 			// hence converting to string to compare
 			check1 := reflect.ValueOf(returned).String()
