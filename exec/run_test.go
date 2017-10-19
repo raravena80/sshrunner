@@ -114,6 +114,30 @@ func TestMakeKeyring(t *testing.T) {
 			},
 			expected: ssh.PublicKeys(testSigners["rsa"]),
 		},
+		{name: "Basic key ring with valid dsa key",
+			useagent: false,
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["dsa"],
+			},
+			expected: ssh.PublicKeys(testSigners["dsa"]),
+		},
+		{name: "Basic key ring with valid dsa key",
+			useagent: false,
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["ecdsa"],
+			},
+			expected: ssh.PublicKeys(testSigners["ecdsa"]),
+		},
+		{name: "Basic key ring with valid dsa key",
+			useagent: false,
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["user"],
+			},
+			expected: ssh.PublicKeys(testSigners["user"]),
+		},
 	}
 
 	for _, tt := range tests {
