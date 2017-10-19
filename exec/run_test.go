@@ -63,6 +63,27 @@ func TestMakeSigner(t *testing.T) {
 			},
 			expected: testSigners["rsa"],
 		},
+		{name: "Basic key signer with valid dsa key",
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["dsa"],
+			},
+			expected: testSigners["dsa"],
+		},
+		{name: "Basic key signer with valid ecdsa key",
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["ecdsa"],
+			},
+			expected: testSigners["ecdsa"],
+		},
+		{name: "Basic key signer with valid user key",
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["user"],
+			},
+			expected: testSigners["user"],
+		},
 	}
 
 	for _, tt := range tests {
@@ -71,6 +92,43 @@ func TestMakeSigner(t *testing.T) {
 			ioutil.WriteFile(tt.key.keyname, tt.key.content, 0644)
 			returned, _ := makeSigner(tt.key.keyname)
 			if !reflect.DeepEqual(returned, tt.expected) {
+				t.Errorf("Value received: %v expected %v", returned, tt.expected)
+			}
+			os.Remove(tt.key.keyname)
+		})
+	}
+}
+
+func TestMakeKeyring(t *testing.T) {
+	tests := []struct {
+		name     string
+		useagent bool
+		key      mockSSHKey
+		expected ssh.AuthMethod
+	}{
+		{name: "Basic key ring with valid rsa key",
+			useagent: false,
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["rsa"],
+			},
+			expected: ssh.PublicKeys(testSigners["rsa"]),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Write content of the key to the keyname file
+			ioutil.WriteFile(tt.key.keyname, tt.key.content, 0644)
+			returned := makeKeyring(tt.key.keyname, tt.useagent)
+			if diff := pretty.Compare(tt.expected, returned); diff != "" {
+				t.Errorf("%s: post-AddCrew diff: (-got +want)\n%s", tt.name, diff)
+			}
+			// DeepEqual always returns false for functions unless nil
+			// hence converting to string to compare
+			check1 := reflect.ValueOf(returned).String()
+			check2 := reflect.ValueOf(tt.expected).String()
+			if !reflect.DeepEqual(check1, check2) {
 				t.Errorf("Value received: %v expected %v", returned, tt.expected)
 			}
 			os.Remove(tt.key.keyname)
