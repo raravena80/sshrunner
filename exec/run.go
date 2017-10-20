@@ -84,7 +84,7 @@ func executeCmd(cmd, hostname string, config *ssh.ClientConfig) string {
 func Run(machines []string, cmd string, user string, key string, useAgent bool) {
 	// in 5 seconds the message will come to timeout channel
 	timeout := time.After(5 * time.Second)
-	results := make(chan string, 10)
+	results := make(chan string, len(machines))
 
 	config := &ssh.ClientConfig{
 		User:            user,
