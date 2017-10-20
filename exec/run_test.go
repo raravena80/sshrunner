@@ -104,11 +104,14 @@ func TestMakeSigner(t *testing.T) {
 }
 
 func setupSshAgent(t *testing.T, socketFile string, keybytes []byte) {
-	ln, err := net.Listen("unix", socketFile)
-	if err != nil {
-		t.Errorf("Couldn't create socket for tests %v", err)
-	}
-	go func(t *testing.T, ln net.Listener) {
+	done := make(chan bool, 1)
+	go func(t *testing.T, done chan<- bool) {
+		ln, err := net.Listen("unix", socketFile)
+		if err != nil {
+			t.Errorf("Couldn't create socket for tests %v", err)
+		}
+		// Need to wait until the socket is setup
+		done <- true
 		for {
 			c, err := ln.Accept()
 			defer c.Close()
@@ -125,7 +128,8 @@ func setupSshAgent(t *testing.T, socketFile string, keybytes []byte) {
 			}(c)
 		}
 
-	}(t, ln)
+	}(t, done)
+	<-done
 }
 
 func TestMakeKeyring(t *testing.T) {
