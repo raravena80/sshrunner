@@ -17,8 +17,12 @@ package exec
 import (
 	"fmt"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 	"golang.org/x/crypto/ssh/testdata"
+	"io"
 	"io/ioutil"
+	"math/rand"
+	"net"
 	"os"
 	"reflect"
 	"testing"
@@ -99,6 +103,31 @@ func TestMakeSigner(t *testing.T) {
 	}
 }
 
+func setupSshAgent(t *testing.T, socketFile string, keybytes []byte) {
+	ln, err := net.Listen("unix", socketFile)
+	if err != nil {
+		t.Errorf("Couldn't create socket for tests %v", err)
+	}
+	go func(t *testing.T, ln net.Listener) {
+		for {
+			c, err := ln.Accept()
+			defer c.Close()
+			if err != nil {
+				t.Errorf("Couldn't accept connection to agent tests %v", err)
+			}
+			go func(c io.ReadWriter) {
+				a := agent.NewKeyring()
+				err := agent.ServeAgent(a, c)
+				if err != nil {
+					t.Errorf("Couldn't serve ssh agent for tests %v", err)
+				}
+
+			}(c)
+		}
+
+	}(t, ln)
+}
+
 func TestMakeKeyring(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -122,7 +151,7 @@ func TestMakeKeyring(t *testing.T) {
 			},
 			expected: ssh.PublicKeys(testSigners["dsa"]),
 		},
-		{name: "Basic key ring with valid dsa key",
+		{name: "Basic key ring with valid ecdsa key",
 			useagent: false,
 			key: mockSSHKey{
 				keyname: "/tmp/mockkey",
@@ -130,7 +159,7 @@ func TestMakeKeyring(t *testing.T) {
 			},
 			expected: ssh.PublicKeys(testSigners["ecdsa"]),
 		},
-		{name: "Basic key ring with valid dsa key",
+		{name: "Basic key ring with valid user key",
 			useagent: false,
 			key: mockSSHKey{
 				keyname: "/tmp/mockkey",
@@ -138,12 +167,34 @@ func TestMakeKeyring(t *testing.T) {
 			},
 			expected: ssh.PublicKeys(testSigners["user"]),
 		},
+		{name: "Basic key ring agent with valid rsa key",
+			useagent: true,
+			key: mockSSHKey{
+				keyname: "",
+				content: testdata.PEMBytes["rsa"],
+			},
+			expected: ssh.PublicKeys(testSigners["rsa"]),
+		},
+		{name: "Basic key ring agent with valid dsa key",
+			useagent: true,
+			key: mockSSHKey{
+				keyname: "",
+				content: testdata.PEMBytes["dsa"],
+			},
+			expected: ssh.PublicKeys(testSigners["dsa"]),
+		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			randomStr := fmt.Sprintf("%v", rand.Intn(5000))
+			socketFile := "/tmp/gosocket" + randomStr + ".sock"
+			if tt.useagent == true {
+				setupSshAgent(t, socketFile, tt.key.content)
+			}
 			// Write content of the key to the keyname file
-			ioutil.WriteFile(tt.key.keyname, tt.key.content, 0644)
+			if tt.key.keyname != "" {
+				ioutil.WriteFile(tt.key.keyname, tt.key.content, 0644)
+			}
 			returned := makeKeyring(tt.key.keyname, tt.useagent)
 			// DeepEqual always returns false for functions unless nil
 			// hence converting to string to compare
@@ -152,7 +203,12 @@ func TestMakeKeyring(t *testing.T) {
 			if !reflect.DeepEqual(check1, check2) {
 				t.Errorf("Value received: %v expected %v", returned, tt.expected)
 			}
-			os.Remove(tt.key.keyname)
+			if tt.useagent == true {
+				os.Remove(socketFile)
+			}
+			if tt.key.keyname != "" {
+				os.Remove(tt.key.keyname)
+			}
 		})
 	}
 }
