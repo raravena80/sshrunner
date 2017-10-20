@@ -32,6 +32,7 @@ var (
 	testPrivateKeys map[string]interface{}
 	testSigners     map[string]ssh.Signer
 	testPublicKeys  map[string]ssh.PublicKey
+	sshAgentSocket  string
 )
 
 func init() {
@@ -51,7 +52,12 @@ func init() {
 		if err != nil {
 			panic(fmt.Sprintf("Unable to create signer for test key %s: %v", t, err))
 		}
+		testPublicKeys[t] = testSigners[t].PublicKey()
 	}
+
+	randomStr := fmt.Sprintf("%v", rand.Intn(5000))
+	socketFile := "/tmp/gosocket" + randomStr + ".sock"
+	setupSshAgent(socketFile)
 }
 
 func TestMakeSigner(t *testing.T) {
@@ -103,33 +109,49 @@ func TestMakeSigner(t *testing.T) {
 	}
 }
 
-func setupSshAgent(t *testing.T, socketFile string, keybytes []byte) {
-	done := make(chan bool, 1)
-	go func(t *testing.T, done chan<- bool) {
+func setupSshAgent(socketFile string) {
+	done := make(chan string, 1)
+	a := agent.NewKeyring()
+	go func(done chan<- string) {
 		ln, err := net.Listen("unix", socketFile)
 		if err != nil {
-			t.Errorf("Couldn't create socket for tests %v", err)
+			panic(fmt.Sprintf("Couldn't create socket for tests %v", err))
 		}
 		// Need to wait until the socket is setup
-		done <- true
+		firstTime := true
 		for {
+			if firstTime == true {
+				done <- socketFile
+				firstTime = false
+			}
 			c, err := ln.Accept()
 			defer c.Close()
 			if err != nil {
-				t.Errorf("Couldn't accept connection to agent tests %v", err)
+				panic(fmt.Sprintf("Couldn't accept connection to agent tests %v", err))
 			}
 			go func(c io.ReadWriter) {
-				a := agent.NewKeyring()
 				err := agent.ServeAgent(a, c)
 				if err != nil {
-					t.Errorf("Couldn't serve ssh agent for tests %v", err)
+					panic(fmt.Sprintf("Couldn't serve ssh agent for tests %v", err))
 				}
 
 			}(c)
 		}
 
-	}(t, done)
-	<-done
+	}(done)
+	sshAgentSocket = <-done
+}
+
+func addKeytoSSHAgent(key agent.AddedKey) {
+	aConn, _ := net.Dial("unix", sshAgentSocket)
+	sshAgent := agent.NewClient(aConn)
+	sshAgent.Add(key)
+}
+
+func removeKeyfromSSHAgent(key ssh.PublicKey) {
+	aConn, _ := net.Dial("unix", sshAgentSocket)
+	sshAgent := agent.NewClient(aConn)
+	sshAgent.Remove(key)
 }
 
 func TestMakeKeyring(t *testing.T) {
@@ -176,6 +198,8 @@ func TestMakeKeyring(t *testing.T) {
 			key: mockSSHKey{
 				keyname: "",
 				content: testdata.PEMBytes["rsa"],
+				privkey: agent.AddedKey{PrivateKey: testPrivateKeys["rsa"]},
+				pubkey:  testPublicKeys["rsa"],
 			},
 			expected: ssh.PublicKeys(testSigners["rsa"]),
 		},
@@ -184,16 +208,26 @@ func TestMakeKeyring(t *testing.T) {
 			key: mockSSHKey{
 				keyname: "",
 				content: testdata.PEMBytes["dsa"],
+				privkey: agent.AddedKey{PrivateKey: testPrivateKeys["dsa"]},
+				pubkey:  testPublicKeys["dsa"],
 			},
 			expected: ssh.PublicKeys(testSigners["dsa"]),
+		},
+		{name: "Basic key ring agent with valid ecdsa key",
+			useagent: true,
+			key: mockSSHKey{
+				keyname: "",
+				content: testdata.PEMBytes["ecdsa"],
+				privkey: agent.AddedKey{PrivateKey: testPrivateKeys["ecdsa"]},
+				pubkey:  testPublicKeys["ecdsa"],
+			},
+			expected: ssh.PublicKeys(testSigners["ecdsa"]),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			randomStr := fmt.Sprintf("%v", rand.Intn(5000))
-			socketFile := "/tmp/gosocket" + randomStr + ".sock"
 			if tt.useagent == true {
-				setupSshAgent(t, socketFile, tt.key.content)
+				addKeytoSSHAgent(tt.key.privkey)
 			}
 			// Write content of the key to the keyname file
 			if tt.key.keyname != "" {
@@ -208,11 +242,30 @@ func TestMakeKeyring(t *testing.T) {
 				t.Errorf("Value received: %v expected %v", returned, tt.expected)
 			}
 			if tt.useagent == true {
-				os.Remove(socketFile)
+				removeKeyfromSSHAgent(tt.key.pubkey)
 			}
 			if tt.key.keyname != "" {
 				os.Remove(tt.key.keyname)
 			}
 		})
+	}
+}
+
+func TestTearDown(t *testing.T) {
+	tests := []struct {
+		name string
+		id   string
+	}{
+		{name: "Teardown SSH Agent",
+			id: "sshAgentTdown"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.id == "sshAgentTdown" {
+				os.Remove(sshAgentSocket)
+			}
+
+		})
+
 	}
 }
