@@ -16,6 +16,7 @@ package exec
 
 import (
 	"fmt"
+	glssh "github.com/gliderlabs/ssh"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 	"golang.org/x/crypto/ssh/testdata"
@@ -58,6 +59,7 @@ func init() {
 	randomStr := fmt.Sprintf("%v", rand.Intn(5000))
 	socketFile := "/tmp/gosocket" + randomStr + ".sock"
 	setupSshAgent(socketFile)
+	startSSHServer()
 }
 
 func TestMakeSigner(t *testing.T) {
@@ -152,6 +154,27 @@ func removeKeyfromSSHAgent(key ssh.PublicKey) {
 	aConn, _ := net.Dial("unix", sshAgentSocket)
 	sshAgent := agent.NewClient(aConn)
 	sshAgent.Remove(key)
+}
+
+func startSSHServer() {
+	//func startSSHServer() {
+	done := make(chan bool, 1)
+	go func(done chan<- bool) {
+		glssh.Handle(func(s glssh.Session) {
+			authorizedKey := ssh.MarshalAuthorizedKey(s.PublicKey())
+			io.WriteString(s, fmt.Sprintf("public key used by %s:\n", s.User()))
+			s.Write(authorizedKey)
+		})
+
+		publicKeyOption := glssh.PublicKeyAuth(func(ctx glssh.Context, key glssh.PublicKey) bool {
+			return true // allow all keys, or use glssh.KeysEqual() to compare against known keys
+		})
+
+		fmt.Println("starting ssh server on port 2222...")
+		done <- true
+		panic(glssh.ListenAndServe(":2222", nil, publicKeyOption))
+	}(done)
+	<-done
 }
 
 func TestMakeKeyring(t *testing.T) {
