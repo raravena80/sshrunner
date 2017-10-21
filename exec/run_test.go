@@ -29,6 +29,13 @@ import (
 	"testing"
 )
 
+type mockSSHKey struct {
+	keyname string
+	content []byte
+	privkey agent.AddedKey
+	pubkey  ssh.PublicKey
+}
+
 var (
 	testPrivateKeys map[string]interface{}
 	testSigners     map[string]ssh.Signer
