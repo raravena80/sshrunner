@@ -49,9 +49,7 @@ func makeKeyring(key string, useAgent bool) ssh.AuthMethod {
 		}
 	}
 
-	keys := []string{
-		key,
-		os.Getenv("HOME") + "/.ssh/id_dsa"}
+	keys := []string{key}
 
 	for _, keyname := range keys {
 		signer, err := makeSigner(keyname)
