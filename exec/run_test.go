@@ -69,55 +69,6 @@ func init() {
 	startSSHServer()
 }
 
-func TestMakeSigner(t *testing.T) {
-	tests := []struct {
-		name     string
-		key      mockSSHKey
-		expected ssh.Signer
-	}{
-		{name: "Basic key signer with valid rsa key",
-			key: mockSSHKey{
-				keyname: "/tmp/mockkey",
-				content: testdata.PEMBytes["rsa"],
-			},
-			expected: testSigners["rsa"],
-		},
-		{name: "Basic key signer with valid dsa key",
-			key: mockSSHKey{
-				keyname: "/tmp/mockkey",
-				content: testdata.PEMBytes["dsa"],
-			},
-			expected: testSigners["dsa"],
-		},
-		{name: "Basic key signer with valid ecdsa key",
-			key: mockSSHKey{
-				keyname: "/tmp/mockkey",
-				content: testdata.PEMBytes["ecdsa"],
-			},
-			expected: testSigners["ecdsa"],
-		},
-		{name: "Basic key signer with valid user key",
-			key: mockSSHKey{
-				keyname: "/tmp/mockkey",
-				content: testdata.PEMBytes["user"],
-			},
-			expected: testSigners["user"],
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Write content of the key to the keyname file
-			ioutil.WriteFile(tt.key.keyname, tt.key.content, 0644)
-			returned, _ := makeSigner(tt.key.keyname)
-			if !reflect.DeepEqual(returned, tt.expected) {
-				t.Errorf("Value received: %v expected %v", returned, tt.expected)
-			}
-			os.Remove(tt.key.keyname)
-		})
-	}
-}
-
 func setupSshAgent(socketFile string) {
 	done := make(chan string, 1)
 	a := agent.NewKeyring()
@@ -181,6 +132,55 @@ func startSSHServer() {
 		panic(glssh.ListenAndServe(":2222", nil, publicKeyOption))
 	}(done)
 	<-done
+}
+
+func TestMakeSigner(t *testing.T) {
+	tests := []struct {
+		name     string
+		key      mockSSHKey
+		expected ssh.Signer
+	}{
+		{name: "Basic key signer with valid rsa key",
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["rsa"],
+			},
+			expected: testSigners["rsa"],
+		},
+		{name: "Basic key signer with valid dsa key",
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["dsa"],
+			},
+			expected: testSigners["dsa"],
+		},
+		{name: "Basic key signer with valid ecdsa key",
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["ecdsa"],
+			},
+			expected: testSigners["ecdsa"],
+		},
+		{name: "Basic key signer with valid user key",
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["user"],
+			},
+			expected: testSigners["user"],
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Write content of the key to the keyname file
+			ioutil.WriteFile(tt.key.keyname, tt.key.content, 0644)
+			returned, _ := makeSigner(tt.key.keyname)
+			if !reflect.DeepEqual(returned, tt.expected) {
+				t.Errorf("Value received: %v expected %v", returned, tt.expected)
+			}
+			os.Remove(tt.key.keyname)
+		})
+	}
 }
 
 func TestMakeKeyring(t *testing.T) {
