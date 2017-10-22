@@ -124,7 +124,12 @@ func startSSHServer() {
 		})
 
 		publicKeyOption := glssh.PublicKeyAuth(func(ctx glssh.Context, key glssh.PublicKey) bool {
-			return true // allow all keys, or use glssh.KeysEqual() to compare against known keys
+			for _, pubk := range testPublicKeys {
+				if glssh.KeysEqual(key, pubk) {
+					return true
+				}
+			}
+			return false // use glssh.KeysEqual() to compare against known keys
 		})
 
 		fmt.Println("starting ssh server on port 2222...")
