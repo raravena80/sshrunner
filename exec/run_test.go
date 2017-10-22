@@ -164,7 +164,6 @@ func removeKeyfromSSHAgent(key ssh.PublicKey) {
 }
 
 func startSSHServer() {
-	//func startSSHServer() {
 	done := make(chan bool, 1)
 	go func(done chan<- bool) {
 		glssh.Handle(func(s glssh.Session) {
