@@ -285,6 +285,61 @@ func TestMakeKeyring(t *testing.T) {
 	}
 }
 
+//func Run(machines []string, cmd string, user string, key string, useAgent bool)
+func TestRun(t *testing.T) {
+	tests := []struct {
+		name     string
+		machines []string
+		port     string
+		user     string
+		cmd      string
+		key      mockSSHKey
+		useagent bool
+		expected bool
+	}{
+		{name: "Basic with valid rsa key",
+			machines: []string{"localhost"},
+			port:     "2222",
+			cmd:      "ls",
+			user:     "testuser",
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["rsa"],
+			},
+			useagent: false,
+			expected: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.useagent == true {
+				addKeytoSSHAgent(tt.key.privkey)
+			}
+			// Write content of the key to the keyname file
+			if tt.key.keyname != "" {
+				ioutil.WriteFile(tt.key.keyname, tt.key.content, 0644)
+			}
+			returned := Run(tt.machines,
+				tt.port,
+				tt.cmd,
+				tt.user,
+				tt.key.keyname,
+				tt.useagent)
+
+			if !(returned == tt.expected) {
+				t.Errorf("Value received: %v expected %v", returned, tt.expected)
+			}
+
+			if tt.useagent == true {
+				removeKeyfromSSHAgent(tt.key.pubkey)
+			}
+			if tt.key.keyname != "" {
+				os.Remove(tt.key.keyname)
+			}
+		})
+	}
+}
+
 func TestTearDown(t *testing.T) {
 	tests := []struct {
 		name string

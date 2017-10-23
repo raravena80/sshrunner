@@ -25,6 +25,11 @@ import (
 	"time"
 )
 
+type executeResult struct {
+	result string
+	err    error
+}
+
 func makeSigner(keyname string) (signer ssh.Signer, err error) {
 	fp, err := os.Open(keyname)
 	if err != nil {
@@ -60,12 +65,12 @@ func makeKeyring(key string, useAgent bool) ssh.AuthMethod {
 	return ssh.PublicKeys(signers...)
 }
 
-func executeCmd(cmd, hostname string, config *ssh.ClientConfig) string {
-	conn, err := ssh.Dial("tcp", hostname+":22", config)
+func executeCmd(cmd, hostname, port string, config *ssh.ClientConfig) executeResult {
+	conn, err := ssh.Dial("tcp", hostname+":"+port, config)
 
 	if err != nil {
-		fmt.Println(err)
-		return ""
+		return executeResult{result: "",
+			err: err}
 	}
 
 	session, _ := conn.NewSession()
@@ -73,16 +78,17 @@ func executeCmd(cmd, hostname string, config *ssh.ClientConfig) string {
 
 	var stdoutBuf bytes.Buffer
 	session.Stdout = &stdoutBuf
-	session.Run(cmd)
+	err = session.Run(cmd)
 
-	return hostname + ":\n" + stdoutBuf.String()
+	return executeResult{result: hostname + ":\n" + stdoutBuf.String(),
+		err: err}
 }
 
 // Run the ssh command
-func Run(machines []string, cmd string, user string, key string, useAgent bool) bool {
+func Run(machines []string, port, cmd, user, key string, useAgent bool) bool {
 	// in 5 seconds the message will come to timeout channel
 	timeout := time.After(5 * time.Second)
-	results := make(chan string, len(machines))
+	results := make(chan executeResult, len(machines))
 
 	config := &ssh.ClientConfig{
 		User:            user,
@@ -92,7 +98,7 @@ func Run(machines []string, cmd string, user string, key string, useAgent bool) 
 
 	for _, m := range machines {
 		go func(hostname string) {
-			results <- executeCmd(cmd, hostname, config)
+			results <- executeCmd(cmd, hostname, port, config)
 			// we’ll write results into the buffered channel of strings
 		}(m)
 	}
@@ -100,7 +106,12 @@ func Run(machines []string, cmd string, user string, key string, useAgent bool) 
 	for i := 0; i < len(machines); i++ {
 		select {
 		case res := <-results:
-			fmt.Print(res)
+			if res.err == nil {
+				fmt.Print(res.result)
+			} else {
+				fmt.Println(res.err)
+				return false
+			}
 		case <-timeout:
 			fmt.Println("Timed out!")
 			return false

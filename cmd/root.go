@@ -40,6 +40,7 @@ var RootCmd = &cobra.Command{
 	// Bare app run
 	Run: func(cmd *cobra.Command, args []string) {
 		exec.Run(viper.GetStringSlice("sshrunner.machines"),
+			viper.GetString("sshrunner.port"),
 			viper.GetString("sshrunner.command"),
 			viper.GetString("sshrunner.user"),
 			viper.GetString("sshrunner.key"),
@@ -68,6 +69,8 @@ func init() {
 	// Local flags
 	RootCmd.Flags().StringArrayVarP(&machines, "machines", "m", []string{}, "Hosts to run command on")
 	viper.BindPFlag("sshrunner.machines", RootCmd.Flags().Lookup("machines"))
+	RootCmd.Flags().StringArrayVarP(&port, "port", "p", "22", "Ssh port to connect to")
+	viper.BindPFlag("sshrunner.port", RootCmd.Flags().Lookup("port"))
 	RootCmd.Flags().StringVarP(&command, "command", "c", "", "Command to run")
 	viper.BindPFlag("sshrunner.command", RootCmd.Flags().Lookup("command"))
 	RootCmd.Flags().StringVarP(&user, "user", "u", curUser, "User to run the command as")
