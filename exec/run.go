@@ -79,7 +79,7 @@ func executeCmd(cmd, hostname string, config *ssh.ClientConfig) string {
 }
 
 // Run the ssh command
-func Run(machines []string, cmd string, user string, key string, useAgent bool) {
+func Run(machines []string, cmd string, user string, key string, useAgent bool) bool {
 	// in 5 seconds the message will come to timeout channel
 	timeout := time.After(5 * time.Second)
 	results := make(chan string, len(machines))
@@ -103,7 +103,8 @@ func Run(machines []string, cmd string, user string, key string, useAgent bool) 
 			fmt.Print(res)
 		case <-timeout:
 			fmt.Println("Timed out!")
-			return
+			return false
 		}
 	}
+	return true
 }
