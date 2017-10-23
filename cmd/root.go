@@ -70,7 +70,7 @@ func init() {
 	// Local flags
 	RootCmd.Flags().StringArrayVarP(&machines, "machines", "m", []string{}, "Hosts to run command on")
 	viper.BindPFlag("sshrunner.machines", RootCmd.Flags().Lookup("machines"))
-	RootCmd.Flags().StringArrayVarP(&port, "port", "p", "22", "Ssh port to connect to")
+	RootCmd.Flags().StringVarP(&port, "port", "p", "22", "Ssh port to connect to")
 	viper.BindPFlag("sshrunner.port", RootCmd.Flags().Lookup("port"))
 	RootCmd.Flags().StringVarP(&command, "command", "c", "", "Command to run")
 	viper.BindPFlag("sshrunner.command", RootCmd.Flags().Lookup("command"))
