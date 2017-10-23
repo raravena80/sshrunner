@@ -29,6 +29,7 @@ var (
 	command  string
 	user     string
 	key      string
+	port     string
 	machines []string
 )
 
