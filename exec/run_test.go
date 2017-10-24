@@ -285,7 +285,6 @@ func TestMakeKeyring(t *testing.T) {
 	}
 }
 
-//func Run(machines []string, cmd string, user string, key string, useAgent bool)
 func TestRun(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -341,6 +340,30 @@ func TestRun(t *testing.T) {
 			key: mockSSHKey{
 				keyname: "/tmp/mockkey",
 				content: testdata.PEMBytes["dsa"],
+			},
+			useagent: false,
+			expected: false,
+		},
+		{name: "Basic with valid rsa key wrong port",
+			machines: []string{"localhost"},
+			port:     "2223",
+			cmd:      "ls",
+			user:     "testuser",
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["rsa"],
+			},
+			useagent: false,
+			expected: false,
+		},
+		{name: "Basic with valid rsa key Google endpoint",
+			machines: []string{"www.google.com"},
+			port:     "22",
+			cmd:      "ls",
+			user:     "testuser",
+			key: mockSSHKey{
+				keyname: "/tmp/mockkey",
+				content: testdata.PEMBytes["rsa"],
 			},
 			useagent: false,
 			expected: false,
