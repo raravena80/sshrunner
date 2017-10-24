@@ -27,7 +27,7 @@ jobs:
       - run:
           name: Run coverage
           command: |
-            go test -v -cover -race -coverprofile=${TEST_RESULTS}/coverage.out
+            go test -v -cover -race -coverprofile=${TEST_RESULTS}/coverage.out exec/*
             goveralls -coverprofile=${TEST_RESULTS}/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
       - run: make
       - store_test_results:
