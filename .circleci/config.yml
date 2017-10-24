@@ -12,19 +12,23 @@ jobs:
           name: Test Results Dir
           command: mkdir -p $TEST_RESULTS
       - run:
-          name: Get Junit reporting tool
-          command: go get github.com/jstemmer/go-junit-report
-      - run:
-          name: Get Gliderlabs ssh
-          command: go get github.com/gliderlabs/ssh
-      - run:
           name: Get all dependencies
-          command: go get ./...
+          command: |
+            go get github.com/jstemmer/go-junit-report
+            go get github.com/gliderlabs/ssh
+            go get golang.org/x/tools/cmd/cover
+            go get github.com/mattn/goveralls
+            go get ./...
       - run:
           name: Run unit tests
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
             make test | tee ${TEST_RESULTS}/go-test.out
+      - run:
+          name: Run coverage
+          command: |
+            go test -v -cover -coverprofile=${TEST_RESULTS}/coverage.out github.com/raravena80/sshrunner/exec
+            goveralls -coverprofile=${TEST_RESULTS}/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
       - run: make
       - store_test_results:
           path: /tmp/test-results
