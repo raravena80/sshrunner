@@ -1,4 +1,4 @@
-# sshrunner [![CircleCI Build Status](https://circleci.com/gh/raravena80/sshrunner.svg?style=shield)](https://circleci.com/gh/raravena80/sshrunner) [![Code Climate](https://img.shields.io/codeclimate/issues/github/raravena80/sshrunner.svg)]() [![Apache Licensed](https://img.shields.io/badge/license-Apache2.0-blue.svg)](https://raw.githubusercontent.com/raravena80/sshrunner/master/LICENSE)
+# sshrunner [![CircleCI Build Status](https://circleci.com/gh/raravena80/sshrunner.svg?style=shield)](https://circleci.com/gh/raravena80/sshrunner) [![Code Climate](https://img.shields.io/codeclimate/issues/github/raravena80/sshrunner.svg)]() [![Coverage Status](https://coveralls.io/repos/github/raravena80/sshrunner/badge.svg)](https://coveralls.io/github/raravena80/sshrunner) [![Apache Licensed](https://img.shields.io/badge/license-Apache2.0-blue.svg)](https://raw.githubusercontent.com/raravena80/sshrunner/master/LICENSE)
 Run commands across servers using ssh
 
 ## Usage
