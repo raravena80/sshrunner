@@ -355,12 +355,12 @@ func TestRun(t *testing.T) {
 			if tt.key.keyname != "" {
 				ioutil.WriteFile(tt.key.keyname, tt.key.content, 0644)
 			}
-			returned := Run(tt.machines,
-				tt.port,
-				tt.cmd,
-				tt.user,
-				tt.key.keyname,
-				tt.useagent)
+			returned := Run(Machines(tt.machines),
+				User(tt.user),
+				Port(tt.port),
+				Cmd(tt.cmd),
+				Key(tt.key.keyname),
+				UseAgent(tt.useagent))
 
 			if !(returned == tt.expected) {
 				t.Errorf("Value received: %v expected %v", returned, tt.expected)

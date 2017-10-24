@@ -40,12 +40,20 @@ var RootCmd = &cobra.Command{
 	Long:  `Sshrunner runs ssh commands across multiple servers`,
 	// Bare app run
 	Run: func(cmd *cobra.Command, args []string) {
-		exec.Run(viper.GetStringSlice("sshrunner.machines"),
-			viper.GetString("sshrunner.port"),
-			viper.GetString("sshrunner.command"),
-			viper.GetString("sshrunner.user"),
-			viper.GetString("sshrunner.key"),
-			viper.GetBool("sshrunner.useagent"))
+		var options []func(*exec.Options)
+		options = append(options,
+			exec.Machines(viper.GetStringSlice("sshrunner.machines")))
+		options = append(options,
+			exec.User(viper.GetString("sshrunner.user")))
+		options = append(options,
+			exec.Port(viper.GetString("sshrunner.port")))
+		options = append(options,
+			exec.Cmd(viper.GetString("sshrunner.command")))
+		options = append(options,
+			exec.Key(viper.GetString("sshrunner.key")))
+		options = append(options,
+			exec.UseAgent(viper.GetBool("sshrunner.useagent")))
+		exec.Run(options...)
 	},
 }
 
