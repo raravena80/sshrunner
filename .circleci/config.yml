@@ -28,7 +28,7 @@ jobs:
           name: Run coverage
           command: |
             go test -v -cover -race -coverprofile=/home/ubuntu/coverage.out
-            /home/ubuntu/.go_workspace/bin/goveralls -coverprofile=/home/ubuntu/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
+            goveralls -coverprofile=/home/ubuntu/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
       - run: make
       - store_test_results:
           path: /tmp/test-results
