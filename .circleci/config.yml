@@ -27,7 +27,7 @@ jobs:
       - run:
           name: Run coverage
           command: |
-            go test -v -cover -coverprofile=${TEST_RESULTS}/coverage.out exec/*
+            go test -v -cover -coverprofile=${TEST_RESULTS}/coverage.out github.com/raravena80/sshrunner/exec
             goveralls -coverprofile=${TEST_RESULTS}/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
       - run: make
       - store_test_results:
