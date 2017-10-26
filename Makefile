@@ -1,7 +1,7 @@
 GOPKG_BASE := github.com/raravena80/sshrunner
 GOPKGS := $(shell go list ./... | grep -v /vendor/)
 GOPKG_COVERS := $(shell go list ./... | grep -v '^$(GOPKG_BASE)/vendor/' | grep -v '^$(GOPKG_BASE)$$' | sed "s|^$(GOPKG_BASE)/|cover/|" | sed 's/$$/.cover/')
-COVER_MODE := set
+COVER_MODE := atomic
 VERSION := $(shell git describe --tags --always)
 FIRST_GOPATH=$(shell go env GOPATH | cut -d: -f1)
 GOFILES = $(shell find . -name '*.go' -not -path './vendor/*')
