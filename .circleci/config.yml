@@ -20,15 +20,10 @@ jobs:
             go get github.com/mattn/goveralls
             go get ./...
       - run:
-          name: Run unit tests
+          name: Run unit tests and coverage
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
-            make test | tee ${TEST_RESULTS}/go-test.out
-      - run:
-          name: Run coverage
-          command: |
-            go test -v -race -cover -coverprofile=${TEST_RESULTS}/coverage.out github.com/raravena80/sshrunner/exec
-            goveralls -coverprofile=${TEST_RESULTS}/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
+            make circle COVERALLS_TOKEN=$COVERALLS_TOKEN | tee ${TEST_RESULTS}/go-test.out
       - run: make
       - store_test_results:
           path: /tmp/test-results
