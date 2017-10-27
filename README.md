@@ -13,7 +13,7 @@ Flags:
       --config string          config file (default is $HOME/.sshrunner.yaml)
   -h, --help                   help for sshrunner
   -k, --key string             Ssh key to use, full path (default "$HOME/.ssh/id_rsa")
-  -m, --machines stringArray   Hosts to run command on
+  -m, --machines stringArray   Hosts to run command on. Comma separated.
   -a, --useagent               Use agent for authentication
   -u, --user string            User to run the command as (default "username")
 ```
