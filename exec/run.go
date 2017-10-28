@@ -150,8 +150,8 @@ func Run(options ...func(*Options)) bool {
 
 	for _, m := range opt.machines {
 		go func(hostname string) {
-			results <- executeCmd(opt, hostname, config)
 			// we’ll write results into the buffered channel of strings
+			results <- executeCmd(opt, hostname, config)
 		}(m)
 	}
 

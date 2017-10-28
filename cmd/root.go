@@ -33,7 +33,6 @@ var (
 	machines []string
 )
 
-// RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "sshrunner",
 	Short: "Sshrunner runs ssh commands across multiple servers",
