@@ -129,7 +129,7 @@ func startSSHServer() {
 					return true
 				}
 			}
-			return false // use glssh.KeysEqual() to compare against known keys
+			return false
 		})
 
 		fmt.Println("starting ssh server on port 2222...")
