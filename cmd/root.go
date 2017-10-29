@@ -36,7 +36,13 @@ var (
 var RootCmd = &cobra.Command{
 	Use:   "sshrunner",
 	Short: "Sshrunner runs ssh commands across multiple servers",
-	Long:  `Sshrunner runs ssh commands across multiple servers`,
+	Long: `Sshrunner runs ssh commands across multiple servers
+
+For example:
+$ sshrunner -c "mkdir /tmp/tmpdir" -m 17.2.2.2,17.2.3.2
+
+Makes /tmp/tmpdir in 17.2.2.2 and 17.2.3.2 (It can also take dns names)
+`,
 	// Bare app run
 	Run: func(cmd *cobra.Command, args []string) {
 		var options []func(*exec.Options)
