@@ -131,12 +131,12 @@ func executeCmd(opt Options, hostname string, config *ssh.ClientConfig) executeR
 }
 
 func Run(options ...func(*Options)) bool {
-	// in 5 seconds the message will come to timeout channel
 	opt := Options{}
 	for _, option := range options {
 		option(&opt)
 	}
 
+	// in 5 seconds the message will come to timeout channel
 	timeout := time.After(5 * time.Second)
 	results := make(chan executeResult, len(opt.machines))
 
