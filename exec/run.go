@@ -155,6 +155,8 @@ func Run(options ...func(*Options)) bool {
 		}(m)
 	}
 
+	retval := true
+
 	for i := 0; i < len(opt.machines); i++ {
 		select {
 		case res := <-results:
@@ -162,12 +164,13 @@ func Run(options ...func(*Options)) bool {
 				fmt.Print(res.result)
 			} else {
 				fmt.Println(res.err)
-				return false
+				retval = false
 			}
 		case <-timeout:
-			fmt.Println("Timed out!")
-			return false
+			fmt.Println(fmt.Sprintf("%v:", opt.machines[i]))
+			fmt.Println("Server timed out!")
+			retval = false
 		}
 	}
-	return true
+	return retval
 }
