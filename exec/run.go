@@ -136,9 +136,9 @@ func Run(options ...func(*Options)) bool {
 		option(&opt)
 	}
 
-	// in 5 seconds the message will come to timeout channel
-	timeout := time.After(5 * time.Second)
-	results := make(chan executeResult, len(opt.machines))
+	// in 20 seconds the message will come to timeout channel
+	timeout := time.After(20 * time.Second)
+	results := make(chan executeResult, len(opt.machines)+1)
 
 	config := &ssh.ClientConfig{
 		User: opt.user,
