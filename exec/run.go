@@ -115,7 +115,7 @@ func executeCmd(opt Options, hostname string, config *ssh.ClientConfig) executeR
 	conn, err := ssh.Dial("tcp", hostname+":"+opt.port, config)
 
 	if err != nil {
-		return executeResult{result: "",
+		return executeResult{result: "Connection refused",
 			err: err}
 	}
 
@@ -163,7 +163,7 @@ func Run(options ...func(*Options)) bool {
 			if res.err == nil {
 				fmt.Print(res.result)
 			} else {
-				fmt.Println(res.err)
+				fmt.Println(res.result, "\n", res.err)
 				retval = false
 			}
 		case <-timeout:
