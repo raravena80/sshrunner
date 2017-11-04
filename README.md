@@ -5,17 +5,24 @@ Run commands across servers using ssh
 ```
 Sshrunner runs ssh commands across multiple servers
 
+For example:
+$ sshrunner -c "mkdir /tmp/tmpdir" -m 17.2.2.2,17.2.3.2
+
+Makes /tmp/tmpdir in 17.2.2.2 and 17.2.3.2 (It can also take dns names)
+
 Usage:
   sshrunner [flags]
 
 Flags:
-  -c, --command string         Command to run
-      --config string          config file (default is $HOME/.sshrunner.yaml)
-  -h, --help                   help for sshrunner
-  -k, --key string             Ssh key to use, full path (default "$HOME/.ssh/id_rsa")
-  -m, --machines stringArray   Hosts to run command on. Comma separated.
-  -a, --useagent               Use agent for authentication
-  -u, --user string            User to run the command as (default "username")
+  -s, --agentsocket string   Socket for the ssh agent (default "/private/tmp/com.apple.launchd.xxx/Listeners")
+  -c, --command string       Command to run
+      --config string        config file (default is $HOME/.sshrunner.yaml)
+  -h, --help                 help for sshrunner
+  -k, --key string           Ssh key to use for authentication, full path (default "/Users/raravena/.ssh/id_rsa")
+  -m, --machines strings     Hosts to run command on
+  -p, --port int             Ssh port to connect to (default 22)
+  -a, --useagent             Use agent for authentication
+  -u, --user string          User to run the command as (default "raravena")
 ```
 
 ## Config
