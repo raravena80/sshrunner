@@ -25,12 +25,13 @@ import (
 )
 
 var (
-	cfgFile  string
-	command  string
-	user     string
-	key      string
-	port     string
-	machines []string
+	cfgFile     string
+	command     string
+	user        string
+	key         string
+	agentsocket string
+	port        int
+	machines    []string
 )
 
 var RootCmd = &cobra.Command{
@@ -51,7 +52,7 @@ Makes /tmp/tmpdir in 17.2.2.2 and 17.2.3.2 (It can also take dns names)
 		options = append(options,
 			exec.User(viper.GetString("sshrunner.user")))
 		options = append(options,
-			exec.Port(viper.GetString("sshrunner.port")))
+			exec.Port(viper.GetInt("sshrunner.port")))
 		options = append(options,
 			exec.Cmd(viper.GetString("sshrunner.command")))
 		options = append(options,
@@ -83,7 +84,7 @@ func init() {
 	// Local flags
 	RootCmd.Flags().StringSliceVarP(&machines, "machines", "m", []string{}, "Hosts to run command on")
 	viper.BindPFlag("sshrunner.machines", RootCmd.Flags().Lookup("machines"))
-	RootCmd.Flags().StringVarP(&port, "port", "p", "22", "Ssh port to connect to")
+	RootCmd.Flags().IntVarP(&port, "port", "p", 22, "Ssh port to connect to")
 	viper.BindPFlag("sshrunner.port", RootCmd.Flags().Lookup("port"))
 	RootCmd.Flags().StringVarP(&command, "command", "c", "", "Command to run")
 	viper.BindPFlag("sshrunner.command", RootCmd.Flags().Lookup("command"))
@@ -93,6 +94,9 @@ func init() {
 	viper.BindPFlag("sshrunner.key", RootCmd.Flags().Lookup("key"))
 	RootCmd.Flags().BoolP("useagent", "a", false, "Use agent for authentication")
 	viper.BindPFlag("sshrunner.useagent", RootCmd.Flags().Lookup("useagent"))
+	RootCmd.Flags().StringVarP(&agentsocket, "agentsocket", "s", os.Getenv("SSH_AUTH_SOCK"), "Socket for the ssh agent")
+	viper.BindPFlag("sshrunner.agentsocket", RootCmd.Flags().Lookup("agentsocket"))
+
 }
 
 // initConfig reads in config file and ENV variables if set.
