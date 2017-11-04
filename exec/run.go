@@ -26,12 +26,13 @@ import (
 )
 
 type Options struct {
-	machines []string
-	port     string
-	user     string
-	cmd      string
-	key      string
-	useAgent bool
+	machines    []string
+	port        int
+	user        string
+	cmd         string
+	key         string
+	agentSocket string
+	useAgent    bool
 }
 
 type executeResult struct {
@@ -45,7 +46,7 @@ func User(u string) func(*Options) {
 	}
 }
 
-func Port(p string) func(*Options) {
+func Port(p int) func(*Options) {
 	return func(e *Options) {
 		e.port = p
 	}
@@ -75,6 +76,12 @@ func UseAgent(u bool) func(*Options) {
 	}
 }
 
+func AgentSocket(s string) func(*Options) {
+	return func(e *Options) {
+		e.agentSocket = s
+	}
+}
+
 func makeSigner(keyname string) (signer ssh.Signer, err error) {
 	fp, err := os.Open(keyname)
 	if err != nil {
@@ -87,11 +94,11 @@ func makeSigner(keyname string) (signer ssh.Signer, err error) {
 	return
 }
 
-func makeKeyring(key string, useAgent bool) ssh.AuthMethod {
+func makeKeyring(key, socket string, useAgent bool) ssh.AuthMethod {
 	signers := []ssh.Signer{}
 
 	if useAgent == true {
-		aConn, _ := net.Dial("unix", os.Getenv("SSH_AUTH_SOCK"))
+		aConn, _ := net.Dial("unix", socket)
 		sshAgent := agent.NewClient(aConn)
 		aSigners, _ := sshAgent.Signers()
 		for _, signer := range aSigners {
@@ -112,7 +119,8 @@ func makeKeyring(key string, useAgent bool) ssh.AuthMethod {
 
 func executeCmd(opt Options, hostname string, config *ssh.ClientConfig) executeResult {
 
-	conn, err := ssh.Dial("tcp", hostname+":"+opt.port, config)
+	port := fmt.Sprint(opt.port)
+	conn, err := ssh.Dial("tcp", hostname+":"+port, config)
 
 	if err != nil {
 		return executeResult{result: "Connection refused",
@@ -136,14 +144,17 @@ func Run(options ...func(*Options)) bool {
 		option(&opt)
 	}
 
-	// in 20 seconds the message will come to timeout channel
-	timeout := time.After(20 * time.Second)
+	// in 10 seconds the message will come to timeout channel
+	timeout := time.After(10 * time.Second)
 	results := make(chan executeResult, len(opt.machines)+1)
 
 	config := &ssh.ClientConfig{
 		User: opt.user,
 		Auth: []ssh.AuthMethod{
-			makeKeyring(opt.key, opt.useAgent),
+			makeKeyring(
+				opt.key,
+				opt.agentSocket,
+				opt.useAgent),
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}

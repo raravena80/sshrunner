@@ -267,7 +267,7 @@ func TestMakeKeyring(t *testing.T) {
 			if tt.key.keyname != "" {
 				ioutil.WriteFile(tt.key.keyname, tt.key.content, 0644)
 			}
-			returned := makeKeyring(tt.key.keyname, tt.useagent)
+			returned := makeKeyring(tt.key.keyname, sshAgentSocket, tt.useagent)
 			// DeepEqual always returns false for functions unless nil
 			// hence converting to string to compare
 			check1 := reflect.ValueOf(returned).String()
@@ -289,16 +289,16 @@ func TestRun(t *testing.T) {
 	tests := []struct {
 		name     string
 		machines []string
-		port     string
 		user     string
 		cmd      string
 		key      mockSSHKey
+		port     int
 		useagent bool
 		expected bool
 	}{
 		{name: "Basic with valid rsa key",
 			machines: []string{"localhost"},
-			port:     "2222",
+			port:     2222,
 			cmd:      "ls",
 			user:     "testuser",
 			key: mockSSHKey{
@@ -310,7 +310,7 @@ func TestRun(t *testing.T) {
 		},
 		{name: "Basic with valid rsa key wrong hostname",
 			machines: []string{"bogushost"},
-			port:     "2222",
+			port:     2222,
 			cmd:      "ls",
 			user:     "testuser",
 			key: mockSSHKey{
@@ -322,7 +322,7 @@ func TestRun(t *testing.T) {
 		},
 		{name: "Basic with valid rsa key wrong port",
 			machines: []string{"localhost"},
-			port:     "2223",
+			port:     2223,
 			cmd:      "ls",
 			user:     "testuser",
 			key: mockSSHKey{
@@ -334,7 +334,7 @@ func TestRun(t *testing.T) {
 		},
 		{name: "Basic with valid rsa key Google endpoint",
 			machines: []string{"www.google.com"},
-			port:     "22",
+			port:     22,
 			cmd:      "ls",
 			user:     "testuser",
 			key: mockSSHKey{
@@ -359,7 +359,8 @@ func TestRun(t *testing.T) {
 				Port(tt.port),
 				Cmd(tt.cmd),
 				Key(tt.key.keyname),
-				UseAgent(tt.useagent))
+				UseAgent(tt.useagent),
+				AgentSocket(sshAgentSocket))
 
 			if !(returned == tt.expected) {
 				t.Errorf("Value received: %v expected %v", returned, tt.expected)
