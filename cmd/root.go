@@ -34,6 +34,7 @@ var (
 	machines    []string
 )
 
+// RootCmd Main root initializer command
 var RootCmd = &cobra.Command{
 	Use:   "sshrunner",
 	Short: "Sshrunner runs ssh commands across multiple servers",
