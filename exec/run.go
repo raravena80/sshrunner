@@ -25,6 +25,7 @@ import (
 	"time"
 )
 
+// Options Type that holds all the options for sshrunner
 type Options struct {
 	machines    []string
 	port        int
@@ -40,42 +41,50 @@ type executeResult struct {
 	err    error
 }
 
+// User Sets the user option
 func User(u string) func(*Options) {
 	return func(e *Options) {
 		e.user = u
 	}
 }
 
+// Port Sets the port option
 func Port(p int) func(*Options) {
 	return func(e *Options) {
 		e.port = p
 	}
 }
 
+// Cmd Sets the command to be run option
 func Cmd(c string) func(*Options) {
 	return func(e *Options) {
 		e.cmd = c
 	}
 }
 
+// Machines Sets the list of machines where to run the command
 func Machines(m []string) func(*Options) {
 	return func(e *Options) {
 		e.machines = m
 	}
 }
 
+// Key Sets the ssh key filename used to authenticate
 func Key(k string) func(*Options) {
 	return func(e *Options) {
 		e.key = k
 	}
 }
 
+// UseAgent Sets whether we want to use the ssh agent to authenticate
 func UseAgent(u bool) func(*Options) {
 	return func(e *Options) {
 		e.useAgent = u
 	}
 }
 
+// AgentSocket Sets the agent socket file
+// Default is the value for env var SSH_AUTH_SOCK
 func AgentSocket(s string) func(*Options) {
 	return func(e *Options) {
 		e.agentSocket = s
@@ -138,6 +147,7 @@ func executeCmd(opt Options, hostname string, config *ssh.ClientConfig) executeR
 		err: err}
 }
 
+// Run Main function that kicks off the run
 func Run(options ...func(*Options)) bool {
 	opt := Options{}
 	for _, option := range options {

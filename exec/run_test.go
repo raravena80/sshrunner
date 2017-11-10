@@ -65,11 +65,11 @@ func init() {
 
 	randomStr := fmt.Sprintf("%v", rand.Intn(5000))
 	socketFile := "/tmp/gosocket" + randomStr + ".sock"
-	setupSshAgent(socketFile)
+	setupSSHAgent(socketFile)
 	startSSHServer()
 }
 
-func setupSshAgent(socketFile string) {
+func setupSSHAgent(socketFile string) {
 	done := make(chan string, 1)
 	a := agent.NewKeyring()
 	go func(done chan<- string) {
