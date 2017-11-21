@@ -85,7 +85,7 @@ func setupSSHAgent(socketFile string) {
 				firstTime = false
 			}
 			c, err := ln.Accept()
-			defer c.Close()
+			//defer c.Close()
 			if err != nil {
 				panic(fmt.Sprintf("Couldn't accept connection to agent tests %v", err))
 			}
