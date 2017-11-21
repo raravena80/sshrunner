@@ -156,7 +156,7 @@ func Run(options ...func(*Options)) bool {
 
 	// in 10 seconds the message will come to timeout channel
 	timeout := time.After(10 * time.Second)
-	results := make(chan executeResult, len(opt.machines)+1)
+	results := make(chan executeResult, len(opt.machines))
 
 	config := &ssh.ClientConfig{
 		User: opt.user,
@@ -178,6 +178,7 @@ func Run(options ...func(*Options)) bool {
 
 	retval := true
 
+	fmt.Println(len(opt.machines))
 	for i := 0; i < len(opt.machines); i++ {
 		select {
 		case res := <-results:
