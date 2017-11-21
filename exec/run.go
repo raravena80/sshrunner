@@ -178,7 +178,6 @@ func Run(options ...func(*Options)) bool {
 
 	retval := true
 
-	fmt.Println(len(opt.machines))
 	for i := 0; i < len(opt.machines); i++ {
 		select {
 		case res := <-results:

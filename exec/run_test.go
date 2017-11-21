@@ -121,6 +121,7 @@ func startSSHServer() {
 			authorizedKey := ssh.MarshalAuthorizedKey(s.PublicKey())
 			io.WriteString(s, fmt.Sprintf("public key used by %s:\n", s.User()))
 			s.Write(authorizedKey)
+			s.Exit(0)
 		})
 
 		publicKeyOption := glssh.PublicKeyAuth(func(ctx glssh.Context, key glssh.PublicKey) bool {
