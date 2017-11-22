@@ -230,7 +230,7 @@ func TestMakeKeyring(t *testing.T) {
 			},
 			expected: ssh.PublicKeys(testSigners["user"]),
 		},
-		{name: "Basic key ring agent with valid rsa key",
+		/*{name: "Basic key ring agent with valid rsa key",
 			useagent: true,
 			key: mockSSHKey{
 				keyname: "",
@@ -259,7 +259,7 @@ func TestMakeKeyring(t *testing.T) {
 				pubkey:  testPublicKeys["ecdsa"],
 			},
 			expected: ssh.PublicKeys(testSigners["ecdsa"]),
-		},
+		}, */
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
