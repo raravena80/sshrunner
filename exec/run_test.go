@@ -79,6 +79,7 @@ func setupSSHAgent(socketFile string) {
 		if err != nil {
 			panic(fmt.Sprintf("Couldn't create socket for tests %v", err))
 		}
+		defer ln.Close()
 		// Need to wait until the socket is setup
 		firstTime := true
 		for {
@@ -87,10 +88,10 @@ func setupSSHAgent(socketFile string) {
 				firstTime = false
 			}
 			c, err := ln.Accept()
-			defer c.Close()
 			if err != nil {
 				panic(fmt.Sprintf("Couldn't accept connection to agent tests %v", err))
 			}
+			defer c.Close()
 			go func(c io.ReadWriter) {
 				err = agent.ServeAgent(a, c)
 				if err != nil {
@@ -230,7 +231,7 @@ func TestMakeKeyring(t *testing.T) {
 			},
 			expected: ssh.PublicKeys(testSigners["user"]),
 		},
-		/*{name: "Basic key ring agent with valid rsa key",
+		{name: "Basic key ring agent with valid rsa key",
 			useagent: true,
 			key: mockSSHKey{
 				keyname: "",
@@ -259,7 +260,7 @@ func TestMakeKeyring(t *testing.T) {
 				pubkey:  testPublicKeys["ecdsa"],
 			},
 			expected: ssh.PublicKeys(testSigners["ecdsa"]),
-		}, */
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
