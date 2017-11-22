@@ -27,6 +27,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 )
 
 type mockSSHKey struct {
@@ -66,6 +67,7 @@ func init() {
 	randomStr := fmt.Sprintf("%v", rand.Intn(5000))
 	socketFile := "/tmp/gosocket" + randomStr + ".sock"
 	setupSSHAgent(socketFile)
+	time.Sleep(2 * time.Second)
 	startSSHServer()
 }
 
