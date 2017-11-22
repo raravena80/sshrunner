@@ -115,12 +115,14 @@ func makeKeyring(key, socket string, useAgent bool) ssh.AuthMethod {
 		}
 	}
 
-	keys := []string{key}
+	if key != "" {
+		keys := []string{key}
 
-	for _, keyname := range keys {
-		signer, err := makeSigner(keyname)
-		if err == nil {
-			signers = append(signers, signer)
+		for _, keyname := range keys {
+			signer, err := makeSigner(keyname)
+			if err == nil {
+				signers = append(signers, signer)
+			}
 		}
 	}
 	return ssh.PublicKeys(signers...)
