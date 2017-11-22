@@ -27,6 +27,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 )
 
 type mockSSHKey struct {
@@ -66,6 +67,7 @@ func init() {
 	randomStr := fmt.Sprintf("%v", rand.Intn(5000))
 	socketFile := "/tmp/gosocket" + randomStr + ".sock"
 	setupSSHAgent(socketFile)
+	time.Sleep(2 * time.Second)
 	startSSHServer()
 }
 
@@ -77,6 +79,7 @@ func setupSSHAgent(socketFile string) {
 		if err != nil {
 			panic(fmt.Sprintf("Couldn't create socket for tests %v", err))
 		}
+		defer ln.Close()
 		// Need to wait until the socket is setup
 		firstTime := true
 		for {
@@ -85,12 +88,12 @@ func setupSSHAgent(socketFile string) {
 				firstTime = false
 			}
 			c, err := ln.Accept()
-			defer c.Close()
 			if err != nil {
 				panic(fmt.Sprintf("Couldn't accept connection to agent tests %v", err))
 			}
+			defer c.Close()
 			go func(c io.ReadWriter) {
-				err := agent.ServeAgent(a, c)
+				err = agent.ServeAgent(a, c)
 				if err != nil {
 					panic(fmt.Sprintf("Couldn't serve ssh agent for tests %v", err))
 				}
@@ -121,6 +124,7 @@ func startSSHServer() {
 			authorizedKey := ssh.MarshalAuthorizedKey(s.PublicKey())
 			io.WriteString(s, fmt.Sprintf("public key used by %s:\n", s.User()))
 			s.Write(authorizedKey)
+			s.Exit(0)
 		})
 
 		publicKeyOption := glssh.PublicKeyAuth(func(ctx glssh.Context, key glssh.PublicKey) bool {
@@ -206,7 +210,7 @@ func TestMakeKeyring(t *testing.T) {
 		{name: "Basic key ring with valid dsa key",
 			useagent: false,
 			key: mockSSHKey{
-				keyname: "/tmp/mockkey",
+				keyname: "/tmp/mockkey11",
 				content: testdata.PEMBytes["dsa"],
 			},
 			expected: ssh.PublicKeys(testSigners["dsa"]),
@@ -214,7 +218,7 @@ func TestMakeKeyring(t *testing.T) {
 		{name: "Basic key ring with valid ecdsa key",
 			useagent: false,
 			key: mockSSHKey{
-				keyname: "/tmp/mockkey",
+				keyname: "/tmp/mockkey12",
 				content: testdata.PEMBytes["ecdsa"],
 			},
 			expected: ssh.PublicKeys(testSigners["ecdsa"]),
@@ -222,7 +226,7 @@ func TestMakeKeyring(t *testing.T) {
 		{name: "Basic key ring with valid user key",
 			useagent: false,
 			key: mockSSHKey{
-				keyname: "/tmp/mockkey",
+				keyname: "/tmp/mockkey13",
 				content: testdata.PEMBytes["user"],
 			},
 			expected: ssh.PublicKeys(testSigners["user"]),
@@ -302,7 +306,7 @@ func TestRun(t *testing.T) {
 			cmd:      "ls",
 			user:     "testuser",
 			key: mockSSHKey{
-				keyname: "/tmp/mockkey",
+				keyname: "/tmp/mockkey21",
 				content: testdata.PEMBytes["rsa"],
 			},
 			useagent: false,
@@ -314,7 +318,7 @@ func TestRun(t *testing.T) {
 			cmd:      "ls",
 			user:     "testuser",
 			key: mockSSHKey{
-				keyname: "/tmp/mockkey",
+				keyname: "/tmp/mockkey22",
 				content: testdata.PEMBytes["rsa"],
 			},
 			useagent: false,
@@ -326,7 +330,7 @@ func TestRun(t *testing.T) {
 			cmd:      "ls",
 			user:     "testuser",
 			key: mockSSHKey{
-				keyname: "/tmp/mockkey",
+				keyname: "/tmp/mockkey23",
 				content: testdata.PEMBytes["rsa"],
 			},
 			useagent: false,
@@ -338,7 +342,7 @@ func TestRun(t *testing.T) {
 			cmd:      "ls",
 			user:     "testuser",
 			key: mockSSHKey{
-				keyname: "/tmp/mockkey",
+				keyname: "/tmp/mockkey24",
 				content: testdata.PEMBytes["rsa"],
 			},
 			useagent: false,

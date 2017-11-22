@@ -12,7 +12,7 @@ default: build
 
 cover/%.cover: %
 	mkdir -p $(dir $@)
-	go test -v -race -coverprofile=$@ -covermode=$(COVER_MODE) ./$<
+	go test -v -coverprofile=$@ -covermode=$(COVER_MODE) ./$<
 
 cover/all: $(GOPKG_COVERS)
 	echo mode: $(COVER_MODE) > $@
