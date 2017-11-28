@@ -3,7 +3,7 @@ Run commands across servers using ssh
 
 ## Usage
 ```
-Sshrunner runs ssh commands across multiple servers
+Sshrunner runs an ssh command across multiple servers
 
 For example:
 $ sshrunner -c "mkdir /tmp/tmpdir" -m 17.2.2.2,17.2.3.2
