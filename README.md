@@ -5,11 +5,6 @@ Run commands across servers using ssh
 ```
 Sshrunner runs an ssh command across multiple servers
 
-For example:
-$ sshrunner -c "mkdir /tmp/tmpdir" -m 17.2.2.2,17.2.3.2
-
-Makes /tmp/tmpdir in 17.2.2.2 and 17.2.3.2 (It can also take dns names)
-
 Usage:
   sshrunner [flags]
 
@@ -23,6 +18,28 @@ Flags:
   -p, --port int             Ssh port to connect to (default 22)
   -a, --useagent             Use agent for authentication
   -u, --user string          User to run the command as (default "raravena")
+```
+
+## Examples
+
+Makes /tmp/tmpdir in 17.2.2.2 and 17.2.3.2:
+```
+$ sshrunner -c "mkdir /tmp/tmpdir" -m 17.2.2.2,17.2.3.2
+```
+
+Creates /tmp/file file in host1 and host2
+```
+$ sshrunner -c "touch /tmp/file" -m host1,host2
+```
+
+Moves a file and creates another one in host1 and host2:
+```
+$ sshrunner -c "mv /tmp/file1 /tmp/file2; touch /tmp/file3" -m host1,host2
+```
+
+Runs with default in `~/.sshrunner.yaml`
+```
+$ sshrunner
 ```
 
 ## Config
