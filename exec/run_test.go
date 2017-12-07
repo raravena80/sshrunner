@@ -22,6 +22,7 @@ import (
 	"golang.org/x/crypto/ssh/testdata"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"net"
 	"os"
 	"reflect"
@@ -63,8 +64,10 @@ func init() {
 		testPublicKeys[t] = testSigners[t].PublicKey()
 	}
 
+	randomStr := fmt.Sprintf("%v", rand.Intn(5000))
+	socketFile := "/tmp/gosocket" + randomStr + ".sock"
+	setupSSHAgent(socketFile)
 	time.Sleep(2 * time.Second)
-	sshAgentSocket = "/tmp/gotestsshagent.sock"
 	startSSHServer()
 }
 
@@ -92,7 +95,7 @@ func setupSSHAgent(socketFile string) {
 			go func(c io.ReadWriter) {
 				err = agent.ServeAgent(a, c)
 				if err != nil {
-					panic(fmt.Sprintf("Couldn't serve ssh agent for tests %v", err))
+					fmt.Sprintf("Couldn't serve ssh agent for tests %v", err)
 				}
 
 			}(c)
