@@ -21,6 +21,10 @@ jobs:
             go get github.com/raravena80/gotestsshagent
             go get ./...
       - run:
+          name: Start ssh agent for tests
+          command: gotestsshagent > /dev/null 2>&1
+          background: true
+      - run:
           name: Run unit tests and coverage
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
