@@ -32,6 +32,7 @@ var (
 	agentsocket string
 	port        int
 	machines    []string
+	Version     string
 )
 
 // RootCmd Main root initializer command
@@ -62,6 +63,7 @@ Makes /tmp/tmpdir in 17.2.2.2 and 17.2.3.2 (It can also take dns names)
 			exec.UseAgent(viper.GetBool("sshrunner.useagent")))
 		exec.Run(options...)
 	},
+	Version: Version,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
