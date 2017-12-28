@@ -14,10 +14,10 @@
   version = "v1.4.2"
 
 [[projects]]
+  branch = "master"
   name = "github.com/gliderlabs/ssh"
   packages = ["."]
-  revision = "f3131153bc4db6b584b40a18491d9e78cdcba314"
-  version = "v0.1.0"
+  revision = "ce31f3cc47feee0c38db7ecfaa154026929ffbda"
 
 [[projects]]
   branch = "master"
@@ -118,6 +118,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e7e723845c73ad2ab5a113df48bd3c0c4609c6ff93d288fec2fbcbf9af2fa16e"
+  inputs-digest = "6f0ad9a07eac7a998912c7a84531031117efd9569ae48d955c9ffee394c786cd"
   solver-name = "gps-cdcl"
   solver-version = 1

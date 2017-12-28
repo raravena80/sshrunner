@@ -5,7 +5,6 @@ import (
 	"net"
 )
 
-// Signal as in RFC 4254 Section 6.10.
 type Signal string
 
 // POSIX signals as listed in RFC 4254 Section 6.10.
@@ -35,16 +34,21 @@ type Option func(*Server) error
 type Handler func(Session)
 
 // PublicKeyHandler is a callback for performing public key authentication.
-type PublicKeyHandler func(user string, key PublicKey) bool
+type PublicKeyHandler func(ctx Context, key PublicKey) bool
 
 // PasswordHandler is a callback for performing password authentication.
-type PasswordHandler func(user, password string) bool
-
-// PermissionsCallback is a hook for setting up user permissions.
-type PermissionsCallback func(user string, permissions *Permissions) error
+type PasswordHandler func(ctx Context, password string) bool
 
 // PtyCallback is a hook for allowing PTY sessions.
-type PtyCallback func(user string, permissions *Permissions) bool
+type PtyCallback func(ctx Context, pty Pty) bool
+
+// ConnCallback is a hook for new connections before handling.
+// It allows wrapping for timeouts and limiting by returning
+// the net.Conn that will be used as the underlying connection.
+type ConnCallback func(conn net.Conn) net.Conn
+
+// LocalPortForwardingCallback is a hook for allowing port forwarding
+type LocalPortForwardingCallback func(ctx Context, destinationHost string, destinationPort uint32) bool
 
 // Window represents the size of a PTY window.
 type Window struct {
@@ -52,9 +56,11 @@ type Window struct {
 	Height int
 }
 
-// Pty represents PTY configuration.
+// Pty represents a PTY request and configuration.
 type Pty struct {
+	Term   string
 	Window Window
+	// HELP WANTED: terminal modes!
 }
 
 // Serve accepts incoming SSH connections on the listener l, creating a new

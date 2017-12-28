@@ -15,11 +15,9 @@ jobs:
           name: Get all dependencies
           command: |
             go get github.com/jstemmer/go-junit-report
-            go get github.com/gliderlabs/ssh
             go get golang.org/x/tools/cmd/cover
             go get github.com/mattn/goveralls
             go get github.com/raravena80/gotestsshagent
-            go get ./...
       - run:
           name: Run unit tests and coverage
           command: |

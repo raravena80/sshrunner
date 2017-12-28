@@ -1,6 +1,6 @@
 [[constraint]]
+  branch = "master"
   name = "github.com/gliderlabs/ssh"
-  version = "0.1.0"
 
 [[constraint]]
   branch = "master"
