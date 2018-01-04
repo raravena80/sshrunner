@@ -156,9 +156,7 @@ func Run(options ...func(*Options)) bool {
 		option(&opt)
 	}
 
-	// in 10 seconds the message will come to timeout channel
-	timeout := time.After(10 * time.Second)
-	results := make(chan executeResult, len(opt.machines))
+	done := make(chan bool, len(opt.machines))
 
 	config := &ssh.ClientConfig{
 		User: opt.user,
@@ -169,29 +167,28 @@ func Run(options ...func(*Options)) bool {
 				opt.useAgent),
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         5 * time.Second,
 	}
 
 	for _, m := range opt.machines {
 		go func(hostname string) {
 			// we’ll write results into the buffered channel of strings
-			results <- executeCmd(opt, hostname, config)
+			res := executeCmd(opt, hostname, config)
+			if res.err == nil {
+				fmt.Print(res.result)
+				done <- true
+			} else {
+				fmt.Println(res.result, "\n", res.err)
+				done <- false
+
+			}
 		}(m)
 	}
 
 	retval := true
 
 	for i := 0; i < len(opt.machines); i++ {
-		select {
-		case res := <-results:
-			if res.err == nil {
-				fmt.Print(res.result)
-			} else {
-				fmt.Println(res.result, "\n", res.err)
-				retval = false
-			}
-		case <-timeout:
-			fmt.Println(fmt.Sprintf("%v:", opt.machines[i]))
-			fmt.Println("Server timed out!")
+		if !<-done {
 			retval = false
 		}
 	}
